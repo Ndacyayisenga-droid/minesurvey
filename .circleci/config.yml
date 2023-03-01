@@ -22,8 +22,10 @@ jobs:
             - ~/.gradle/wrapper
           key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "app/build.gradle.kts" }}
       - run:
-          name: Run Unit Tests
-          command: ./gradlew lint testDebugUnitTest
+          name: Run Tests
+          command: |
+          ./gradlew lint test connectedAndroidTest
+
       - run:
           name: Run Integration Tests
           command: ./gradlew connectedDebugAndroidTest
