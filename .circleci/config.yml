@@ -9,7 +9,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "app/build.gradle.kts" }}
+          key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "./build.gradle.kts" }}
       - run:
           name: Grant execution permission to Gradle Wrapper
           command: chmod +x ./gradlew
@@ -20,7 +20,7 @@ jobs:
           paths:
             - ~/.gradle/caches
             - ~/.gradle/wrapper
-          key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "app/build.gradle.kts" }}
+          key: jars-{{ checksum "build.gradle.kts" }}-{{ checksum "./build.gradle.kts" }}
       - run:
           name: Run Tests
           command: ./gradlew lint test
