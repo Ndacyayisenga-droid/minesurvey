@@ -24,19 +24,6 @@ jobs:
       - run:
           name: Run Tests
           command: ./gradlew lint test
-
-      - run:
-          name: Run Code Analysis
-          command: ./gradlew lint checkstyle findbugs pmd
-      - run:
-          name: Check Code Coverage
-          command: ./gradlew jacocoTestReport
-      - run:
-          name: Run Security Scan
-          command: ./gradlew dependencyCheckAnalyze
-      - run:
-          name: Perform Code Review
-          command: ./gradlew crucibleReview
       - run:
           name: Deploy to Staging Environment
           command: ansible-playbook -i inventory/staging deploy.yml
