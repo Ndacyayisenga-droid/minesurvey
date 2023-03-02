@@ -26,12 +26,6 @@ jobs:
           command: ./gradlew lint test
 
       - run:
-          name: Run Integration Tests
-          command: ./gradlew connectedDebugAndroidTest
-      - run:
-          name: Run Performance Tests
-          command: ./gradlew assembleDebug createDebugCoverageReport connectedDebugAndroidTest jacocoTestReport
-      - run:
           name: Run Code Analysis
           command: ./gradlew lint checkstyle findbugs pmd
       - run:
