@@ -15,7 +15,7 @@ jobs:
           command: chmod +x ./gradlew
       - run:
           name: Download Dependencies
-          command: ./gradlew cleanBuildCache assembleDebug
+          command: ./gradlew cleanBuildCache assembleRelease
       - save_cache:
           paths:
             - ~/.gradle/caches
@@ -25,11 +25,29 @@ jobs:
           name: Run Tests
           command: ./gradlew lint test
       - run:
-          name: Deploy to Staging Environment
-          command: ansible-playbook -i inventory/staging deploy.yml
+          name: Sign APK
+          command: jarsigner -verbose -sigalg SHA256withRSA -digestalg SHA-256 -keystore my-release-key.keystore app/build/outputs/apk/release/app-release-unsigned.apk alias_name
       - run:
-          name: Deploy to Production Environment
-          command: ansible-playbook -i inventory/production deploy.yml
+          name: Optimize APK
+          command: zipalign -v 4 app/build/outputs/apk/release/app-release-unsigned.apk app/build/outputs/apk/release/app-release.apk
+      - deploy:
+          name: Deploy to Play Store
+          command: |
+            curl "https://www.googleapis.com/upload/androidpublisher/v3/applications/{packageName}/edits?access_token={accessToken}" \
+            -X POST \
+            -H "Content-Type: application/json" \
+            -d "{\"id\": \"${edit_id}\"}" \
+            | tee edit_response.json
+            export edit_id=$(cat edit_response.json | jq -r '.id')
+            echo $edit_id
+            curl "https://www.googleapis.com/upload/androidpublisher/v3/applications/{packageName}/edits/${edit_id}/apks?access_token={accessToken}&uploadType=media" \
+            -X POST \
+            -H "Content-Type: application/octet-stream" \
+            --data-binary "@app/build/outputs/apk/release/app-release.apk" \
+            | tee upload_response.json
+          environment:
+            packageName: "com.example.myapp"
+            accessToken: ${{ secrets.GOOGLE_PLAY_API_KEY }}
       - store_artifacts:
           path: app/build/reports
           destination: reports
